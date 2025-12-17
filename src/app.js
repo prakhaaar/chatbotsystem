@@ -5,7 +5,10 @@ const app = express();
 // Middleware
 app.use(express.json());
 
-// Health check route
+// Routes
+app.use("/api/users", require("./routes/user.routes"));
+
+// Health check
 app.get("/health", (req, res) => {
   res.status(200).json({
     status: "ok",
