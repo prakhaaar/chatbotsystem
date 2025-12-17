@@ -1,7 +1,9 @@
 const Query = require("../models/Query");
+const Conversation = require("../models/Conversation");
+const { askLLM } = require("../services/llm.service");
 
 /**
- * @desc    Create a query
+ * @desc    Ask chatbot (LLM)
  * @route   POST /api/chat
  * @access  Public
  */
@@ -16,25 +18,43 @@ const createChat = async (req, res) => {
       });
     }
 
+    // 1️⃣ Create Query
     const query = await Query.create({
       user: userId,
       question,
       status: "pending",
     });
 
+    // 2️⃣ Ask LLM
+    const aiResponse = await askLLM(question);
+
+    // 3️⃣ Save Conversation
+    const conversation = await Conversation.create({
+      user: userId,
+      query: query._id,
+      question,
+      response: aiResponse,
+    });
+
+    // 4️⃣ Update Query status
+    query.status = "answered";
+    await query.save();
+
     return res.status(201).json({
       success: true,
-      message: "Query received",
+      message: "Response generated",
       data: {
         queryId: query._id,
-        status: query.status,
+        conversationId: conversation._id,
+        response: aiResponse,
       },
     });
   } catch (error) {
-    console.error("Create chat error:", error);
+    console.error("Chatbot error:", error);
+
     return res.status(500).json({
       success: false,
-      message: "Internal server error",
+      message: "Failed to generate response",
     });
   }
 };

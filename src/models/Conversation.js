@@ -29,7 +29,7 @@ const conversationSchema = new mongoose.Schema(
     llmProvider: {
       type: String,
       enum: ["openai", "groq", "gemini", "other"],
-      default: "openai",
+      default: "gemini",
     },
   },
   {
