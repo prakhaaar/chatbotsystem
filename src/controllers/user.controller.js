@@ -1,5 +1,5 @@
 const User = require("../models/User");
-
+const bcrypt = require("bcryptjs");
 /**
  * @desc    Create a new user
  * @route   POST /api/users
@@ -7,17 +7,17 @@ const User = require("../models/User");
  */
 const createUser = async (req, res) => {
   try {
-    const { name, email, phone } = req.body;
+    const { name, email, phone, password } = req.body;
 
-    // Basic validation
-    if (!name || !email) {
+    // Validation
+    if (!name || !email || !password) {
       return res.status(400).json({
         success: false,
-        message: "Name and email are required",
+        message: "Name, email, and password are required",
       });
     }
 
-    // Check if user already exists
+    // Existing user check
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(409).json({
@@ -26,11 +26,15 @@ const createUser = async (req, res) => {
       });
     }
 
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     // Create user
     const user = await User.create({
       name,
       email,
       phone,
+      password: hashedPassword,
     });
 
     return res.status(201).json({

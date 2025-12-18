@@ -5,17 +5,6 @@ const client = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY,
 });
 
-const listAvailableModels = async () => {
-  try {
-    const response = await client.models.list();
-    console.log("--- Verified Available Models ---");
-    response.models.forEach((m) => console.log(`> ${m.name}`));
-    console.log("---------------------------------");
-  } catch (error) {
-    console.error("Could not list models:", error.message);
-  }
-};
-
 const askLLM = async (question) => {
   try {
 
@@ -38,8 +27,7 @@ Question: ${question}`
   } catch (error) {
     console.error("Chatbot Service Error:", error.message);
     
-    // Fallback logic: if 1.5-flash fails, try the newer 2.0 version 
-    // which is often the default in late 2025 environments.
+    // Fallback logic: if 1.5-flash fails;
     if (error.message.includes("404")) {
         console.log("Attempting fallback to gemini-2.0-flash...");
         const fallback = await client.models.generateContent({

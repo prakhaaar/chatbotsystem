@@ -8,6 +8,7 @@ app.use(express.json());
 app.use("/api/users", require("./routes/user.routes"));
 app.use("/api/chat", require("./routes/chat.routes"));
 app.use("/api/conversations", require("./routes/conversation.routes"));
+app.use("/api/auth", require("./routes/auth.routes"));
 
 
 // Health check

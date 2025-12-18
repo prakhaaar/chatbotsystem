@@ -5,10 +5,15 @@ const {
   getUserById,
 } = require("../controllers/user.controller");
 
+const { protect } = require("../../middlewares/auth.middleware");
+
 const router = express.Router();
 
+// this is public route
 router.post("/", createUser);
-router.get("/", getAllUsers);
-router.get("/:id", getUserById);
+
+// i have protected  these routes
+router.get("/", protect, getAllUsers);
+router.get("/:id", protect, getUserById);
 
 module.exports = router;
