@@ -1,0 +1,1126 @@
+{
+	"info": {
+		"_postman_id": "968aad5d-6e86-4faa-ad70-4531906e30fa",
+		"name": "Mini Student Advisory Chatbot API",
+		"description": "# Mini Student Advisory Chatbot API\n\n## Overview\n\nThe Mini Student Advisory Chatbot API provides intelligent student advisory services through a conversational AI interface. Students can get answers about studying abroad, visa processes, university admissions, and other education-related queries through our AI-powered chatbot.\n\nThe system handles user management, authentication, conversation tracking, and includes role-based access with separate endpoints for users and administrators.\n\n## Base URL\n\n```\nhttp://localhost:5000\n\n ```\n\n## Authentication\n\nThis API uses JWT (JSON Web Token) authentication for protected endpoints.\n\n### Getting Started with Authentication\n\n1. Register using the `/api/users` endpoint\n    \n2. Login via `/api/auth/login` to get your JWT token\n    \n3. Add the token to your request headers:\n    \n\n```\nAuthorization: Bearer <your_jwt_token>\n\n ```\n\n### User Roles\n\n- **Regular User**: Access chatbot, view own conversations, manage profile\n    \n- **Admin**: Full access to user data, all conversations, and admin endpoints\n    \n\n## Rate Limits\n\nThe API enforces rate limits to maintain system performance and fair usage:\n\n- **Regular Users**: 100 requests per hour\n    \n- **Admin Users**: No rate limits\n    \n\nEach API response includes rate limit headers:\n\n- `X-RateLimit-Limit`: Your hourly request limit\n    \n- `X-RateLimit-Remaining`: Requests left in current window\n    \n- `X-RateLimit-Reset`: When your limit resets (Unix timestamp)\n    \n\nWhen you hit the rate limit, you'll get a `429 Too Many Requests` response. Check the `X-RateLimit-Reset` header to see when you can make requests again.\n\nYou can check your current rate limit status anytime using the `/api/rate-limit/status` endpoint.\n\n## API Endpoints\n\n### 1\\. User Management\n\n#### Create User (Register)\n\nCreates a new user account.\n\n**Endpoint:** `POST /api/users`\n\n**Request Body:**\n\n``` json\n{\n  \"name\": \"Prakhar Mishra\",\n  \"email\": \"prakhar@test.com\",\n  \"phone\": \"9999999999\",\n  \"password\": \"password123\"\n}\n\n ```\n\n**Response:** `201 Created`\n\n``` json\n{\n  \"success\": true,\n  \"message\": \"User created successfully\",\n  \"data\": {\n    \"userId\": \"6942f6bdc1b00356911f8df7\",\n    \"name\": \"Prakhar Mishra\",\n    \"email\": \"prakhar@test.com\"\n  }\n}\n\n ```\n\n---\n\n#### Get All Users\n\nReturns a list of all registered users.\n\n**Endpoint:** `GET /api/users`\n\n**Response:** `200 OK`\n\n``` json\n{\n  \"success\": true,\n  \"data\": [\n    {\n      \"userId\": \"6942f6bdc1b00356911f8df7\",\n      \"name\": \"Prakhar Mishra\",\n      \"email\": \"prakhar@test.com\",\n      \"phone\": \"9999999999\",\n      \"createdAt\": \"2024-01-15T10:30:00Z\"\n    }\n  ]\n}\n\n ```\n\n---\n\n#### Get User by ID\n\nGet details for a specific user.\n\n**Endpoint:** `GET /api/users/:userId`\n\n**Response:** `200 OK`\n\n``` json\n{\n  \"success\": true,\n  \"data\": {\n    \"userId\": \"6942f6bdc1b00356911f8df7\",\n    \"name\": \"Prakhar Mishra\",\n    \"email\": \"prakhar@test.com\",\n    \"phone\": \"9999999999\",\n    \"role\": \"user\",\n    \"createdAt\": \"2024-01-15T10:30:00Z\"\n  }\n}\n\n ```\n\n---\n\n### 2\\. Authentication\n\n#### Login\n\nAuthenticate and receive a JWT token.\n\n**Endpoint:** `POST /api/auth/login`\n\n**Request Body:**\n\n``` json\n{\n  \"email\": \"prakhar@test.com\",\n  \"password\": \"password123\"\n}\n\n ```\n\n**Response:** `200 OK`\n\n``` json\n{\n  \"success\": true,\n  \"message\": \"Login successful\",\n  \"data\": {\n    \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n    \"user\": {\n      \"userId\": \"6942f6bdc1b00356911f8df7\",\n      \"name\": \"Prakhar Mishra\",\n      \"email\": \"prakhar@test.com\",\n      \"role\": \"user\"\n    }\n  }\n}\n\n ```\n\n---\n\n### 3\\. Chatbot Interaction\n\n#### Ask Chatbot\n\nSend a question to the AI chatbot.\n\n**Endpoint:** `POST /api/chat`\n\n**Headers:**\n\n```\nAuthorization: Bearer <your_jwt_token>\n\n ```\n\n**Request Body:**\n\n``` json\n{\n  \"userId\": \"6942f6bdc1b00356911f8df7\",\n  \"message\": \"What are the requirements for studying in the UK?\"\n}\n\n ```\n\n**Response:** `200 OK`\n\n``` json\n{\n  \"success\": true,\n  \"data\": {\n    \"conversationId\": \"694301a2c1b00356911f8e12\",\n    \"response\": \"To study in the UK, you'll need...\",\n    \"timestamp\": \"2024-01-15T11:00:00Z\"\n  }\n}\n\n ```\n\n---\n\n### 4\\. Conversation History\n\n#### Get Conversations by User\n\nGet all conversations for a specific user.\n\n**Endpoint:** `GET /api/conversations/user/:userId`\n\n**Headers:**\n\n```\nAuthorization: Bearer <your_jwt_token>\n\n ```\n\n**Response:** `200 OK`\n\n``` json\n{\n  \"success\": true,\n  \"data\": [\n    {\n      \"conversationId\": \"694301a2c1b00356911f8e12\",\n      \"userId\": \"6942f6bdc1b00356911f8df7\",\n      \"messages\": [\n        {\n          \"role\": \"user\",\n          \"content\": \"What are the requirements for studying in the UK?\",\n          \"timestamp\": \"2024-01-15T11:00:00Z\"\n        },\n        {\n          \"role\": \"assistant\",\n          \"content\": \"To study in the UK, you'll need...\",\n          \"timestamp\": \"2024-01-15T11:00:05Z\"\n        }\n      ],\n      \"createdAt\": \"2024-01-15T11:00:00Z\"\n    }\n  ]\n}\n\n ```\n\n---\n\n#### Get Recent Conversations\n\nGet your most recent conversations.\n\n**Endpoint:** `GET /api/conversations/recent`\n\n**Headers:**\n\n```\nAuthorization: Bearer <your_jwt_token>\n\n ```\n\n**Query Parameters:**\n\n- `limit` (optional): Number of conversations to return (default: 10)\n    \n\n**Response:** `200 OK`\n\n---\n\n### 5\\. Rate Limiting\n\n#### Check Rate Limit Status\n\nCheck your current rate limit status.\n\n**Endpoint:** `GET /api/rate-limit/status`\n\n**Headers:**\n\n```\nAuthorization: Bearer <your_jwt_token>\n\n ```\n\n**Response:** `200 OK`\n\n``` json\n{\n  \"success\": true,\n  \"data\": {\n    \"limit\": 100,\n    \"remaining\": 73,\n    \"reset\": 1705324800,\n    \"resetTime\": \"2024-01-15T12:00:00Z\"\n  }\n}\n\n ```\n\n---\n\n### 6\\. Admin Endpoints\n\nAdmin endpoints require an admin role token.\n\n#### Get All Users (Admin)\n\nGet all users with detailed information.\n\n**Endpoint:** `GET /api/admin/users`\n\n**Headers:**\n\n```\nAuthorization: Bearer <admin_jwt_token>\n\n ```\n\n**Response:** `200 OK`\n\n``` json\n{\n  \"success\": true,\n  \"data\": [\n    {\n      \"userId\": \"6942f6bdc1b00356911f8df7\",\n      \"name\": \"Prakhar Mishra\",\n      \"email\": \"prakhar@test.com\",\n      \"role\": \"user\",\n      \"totalConversations\": 15,\n      \"lastActive\": \"2024-01-15T11:00:00Z\"\n    }\n  ]\n}\n\n ```\n\n---\n\n#### Get All Conversations (Admin)\n\nView all conversations across the system.\n\n**Endpoint:** `GET /api/admin/conversations`\n\n**Headers:**\n\n```\nAuthorization: Bearer <admin_jwt_token>\n\n ```\n\n**Response:** `200 OK`\n\n---\n\n#### Get All Rate Limits (Admin)\n\nView rate limit status for all users.\n\n**Endpoint:** `GET /api/admin/rate-limits`\n\n**Headers:**\n\n```\nAuthorization: Bearer <admin_jwt_token>\n\n ```\n\n**Response:** `200 OK`\n\n``` json\n{\n  \"success\": true,\n  \"data\": [\n    {\n      \"userId\": \"6942f6bdc1b00356911f8df7\",\n      \"email\": \"prakhar@test.com\",\n      \"limit\": 100,\n      \"remaining\": 73,\n      \"requestsUsed\": 27,\n      \"resetTime\": \"2024-01-15T12:00:00Z\"\n    }\n  ]\n}\n\n ```\n\n---\n\n#### System Analytics Overview\n\nGet system-wide usage statistics.\n\n**Endpoint:** `GET /api/admin/analytics/overview`\n\n**Headers:**\n\n```\nAuthorization: Bearer <admin_jwt_token>\n\n ```\n\n**Response:** `200 OK`\n\n``` json\n{\n  \"success\": true,\n  \"data\": {\n    \"totalUsers\": 1247,\n    \"activeUsers\": 892,\n    \"totalConversations\": 15634,\n    \"averageConversationsPerUser\": 12.5,\n    \"totalMessages\": 78234,\n    \"systemUptime\": \"45 days\"\n  }\n}\n\n ```\n\n---\n\n#### User Engagement Metrics\n\nGet user activity and engagement data.\n\n**Endpoint:** `GET /api/admin/analytics/users`\n\n**Headers:**\n\n```\nAuthorization: Bearer <admin_jwt_token>\n\n ```\n\n**Response:** `200 OK`\n\n``` json\n{\n  \"success\": true,\n  \"data\": {\n    \"dailyActiveUsers\": 234,\n    \"weeklyActiveUsers\": 678,\n    \"monthlyActiveUsers\": 892,\n    \"newUsersToday\": 12,\n    \"newUsersThisWeek\": 45,\n    \"userRetentionRate\": 78.5,\n    \"averageSessionDuration\": \"8.5 minutes\"\n  }\n}\n\n ```\n\n---\n\n#### Conversation Analytics\n\nGet conversation patterns and chatbot performance metrics.\n\n**Endpoint:** `GET /api/admin/analytics/conversations`\n\n**Headers:**\n\n```\nAuthorization: Bearer <admin_jwt_token>\n\n ```\n\n**Response:** `200 OK`\n\n``` json\n{\n  \"success\": true,\n  \"data\": {\n    \"totalConversations\": 15634,\n    \"conversationsToday\": 234,\n    \"averageMessagesPerConversation\": 5.2,\n    \"averageResponseTime\": \"1.2 seconds\",\n    \"conversationsByCategory\": {\n      \"visa\": 4521,\n      \"admissions\": 3892,\n      \"scholarships\": 2341,\n      \"general\": 4880\n    }\n  }\n}\n\n ```\n\n---\n\n#### Popular Queries\n\nGet the most common questions and topics.\n\n**Endpoint:** `GET /api/admin/analytics/popular-queries`\n\n**Headers:**\n\n```\nAuthorization: Bearer <admin_jwt_token>\n\n ```\n\n**Response:** `200 OK`\n\n``` json\n{\n  \"success\": true,\n  \"data\": [\n    {\n      \"query\": \"visa requirements\",\n      \"count\": 1234,\n      \"category\": \"visa\"\n    },\n    {\n      \"query\": \"scholarship opportunities\",\n      \"count\": 987,\n      \"category\": \"scholarships\"\n    },\n    {\n      \"query\": \"university rankings\",\n      \"count\": 856,\n      \"category\": \"admissions\"\n    }\n  ]\n}\n\n ```\n\n---\n\n## Error Responses\n\nStandard HTTP status codes are used:\n\n- `200 OK`: Request succeeded\n    \n- `201 Created`: Resource created successfully\n    \n- `400 Bad Request`: Invalid request parameters\n    \n- `401 Unauthorized`: Missing or invalid token\n    \n- `403 Forbidden`: Insufficient permissions\n    \n- `404 Not Found`: Resource not found\n    \n- `429 Too Many Requests`: Rate limit exceeded\n    \n- `500 Internal Server Error`: Server error\n    \n\nError format:\n\n``` json\n{\n  \"success\": false,\n  \"error\": \"Error message describing what went wrong\"\n}\n\n ```\n\n---\n\n## Quick Start Guide\n\n1. Register a new account\n    \n2. Login to get your JWT token\n    \n3. Include the token in Authorization header for protected endpoints\n    \n4. Start chatting with the AI assistant\n    \n5. Monitor your rate limit to avoid hitting the hourly cap\n    \n\nFor admin access, contact your system administrator.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "38967419"
+	},
+	"item": [
+		{
+			"name": "User Management",
+			"item": [
+				{
+					"name": "Create User",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"Rahul\",\r\n  \"email\": \"rahul@test22.com\",\r\n  \"phone\": \"9876543211\",\r\n  \"password\": \"password123\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/users",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"users"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Invalid Input - Missing Fields",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\"name\": \"John Doe\", \"email\": \"john@test.com\"}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:5000/api/users",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"users"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": ""
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": false,\n  \"message\": \"Validation error\",\n  \"errors\": [\n    {\n      \"field\": \"phone\",\n      \"message\": \"Phone number is required\"\n    },\n    {\n      \"field\": \"password\",\n      \"message\": \"Password is required\"\n    }\n  ]\n}"
+						},
+						{
+							"name": "Email Already Exists",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\"name\": \"John Doe\", \"email\": \"sarah.johnson@university.edu\", \"phone\": \"9876543210\", \"password\": \"Password123!\"}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:5000/api/users",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"users"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": ""
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": false,\n  \"message\": \"Email already registered\",\n  \"error\": \"DUPLICATE_EMAIL\"\n}"
+						},
+						{
+							"name": "Successful Registration",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\"name\": \"Sarah Johnson\", \"email\": \"sarah.johnson@university.edu\", \"phone\": \"1234567890\", \"password\": \"SecurePass123!\"}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:5000/api/users",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"users"
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": ""
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"User registered successfully\",\n  \"data\": {\n    \"user\": {\n      \"_id\": \"6942f6bdc1b00356911f8df7\",\n      \"name\": \"Sarah Johnson\",\n      \"email\": \"sarah.johnson@university.edu\",\n      \"phone\": \"1234567890\",\n      \"role\": \"user\",\n      \"createdAt\": \"2024-01-15T10:30:00.000Z\"\n    },\n    \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTQyZjZiZGMxYjAwMzU2OTExZjhkZjciLCJyb2xlIjoidXNlciIsImlhdCI6MTcwNTMxNzAwMCwiZXhwIjoxNzA1MzIwNjAwfQ.example_signature\"\n  }\n}"
+						}
+					]
+				},
+				{
+					"name": "Get Users",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTQ0MGE3MWRhMTZiNWQxNWY5MTBmZTEiLCJpYXQiOjE3NjYwNzU4NTUsImV4cCI6MTc2NjY4MDY1NX0.UKFuHVwKh10TTE7XD8OWY0SJ3oITeS6IxSAnC08FfNk",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:5000/api/users",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get User by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTQ0ZGI2OGRmNDkxYmY2N2IxMzQ3MzIiLCJyb2xlIjoidXNlciIsImlhdCI6MTc2NjEyMDM4NCwiZXhwIjoxNzY2NzI1MTg0fQ.gbvU7yJ3K4hg89dECJMzldi96AhsUOvRWcfMli3tWYw",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:5000/api/users/6942f6bdc1b00356911f8df7",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"users",
+								"6942f6bdc1b00356911f8df7"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Successful Get User",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTQyZjZiZGMxYjAwMzU2OTExZjhkZjciLCJyb2xlIjoidXNlciIsImlhdCI6MTcwNTMxNzAwMCwiZXhwIjoxNzA1MzIwNjAwfQ.example_signature"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "http://localhost:5000/api/users/6942f6bdc1b00356911f8df7",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"users",
+										"6942f6bdc1b00356911f8df7"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "6942f6bdc1b00356911f8df7"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Authorization",
+									"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTQyZjZiZGMxYjAwMzU2OTExZjhkZjciLCJyb2xlIjoidXNlciIsImlhdCI6MTcwNTMxNzAwMCwiZXhwIjoxNzA1MzIwNjAwfQ.example_signature",
+									"description": ""
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"data\": {\n    \"_id\": \"6942f6bdc1b00356911f8df7\",\n    \"name\": \"Sarah Johnson\",\n    \"email\": \"sarah.johnson@university.edu\",\n    \"phone\": \"1234567890\",\n    \"role\": \"user\",\n    \"createdAt\": \"2024-01-15T10:30:00.000Z\",\n    \"updatedAt\": \"2024-01-15T10:30:00.000Z\"\n  }\n}"
+						},
+						{
+							"name": "Missing Authentication Token",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "http://localhost:5000/api/users/6942f6bdc1b00356911f8df7",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"users",
+										"6942f6bdc1b00356911f8df7"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "6942f6bdc1b00356911f8df7"
+										}
+									]
+								}
+							},
+							"status": "Unauthorized",
+							"code": 401,
+							"_postman_previewlanguage": "json",
+							"header": [],
+							"cookie": [],
+							"body": "{\n  \"success\": false,\n  \"message\": \"Authentication required\",\n  \"error\": \"NO_TOKEN_PROVIDED\"\n}"
+						},
+						{
+							"name": "User Not Found",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTQyZjZiZGMxYjAwMzU2OTExZjhkZjciLCJyb2xlIjoidXNlciIsImlhdCI6MTcwNTMxNzAwMCwiZXhwIjoxNzA1MzIwNjAwfQ.example_signature"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "http://localhost:5000/api/users/507f1f77bcf86cd799439011",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"users",
+										"507f1f77bcf86cd799439011"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "507f1f77bcf86cd799439011"
+										}
+									]
+								}
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Authorization",
+									"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTQyZjZiZGMxYjAwMzU2OTExZjhkZjciLCJyb2xlIjoidXNlciIsImlhdCI6MTcwNTMxNzAwMCwiZXhwIjoxNzA1MzIwNjAwfQ.example_signature",
+									"description": ""
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": false,\n  \"message\": \"User not found\",\n  \"error\": \"USER_NOT_FOUND\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Create User 2",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"Prakhar Mishra\",\r\n  \"email\": \"prakhar@test1.com\",\r\n  \"phone\": \"9999999999\",\r\n  \"password\": \"password123\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/users",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"users"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "# User Management\n\nThis folder contains all endpoints related to user registration, authentication, and profile management for the Student Advisory Chatbot API.\n\n## Purpose\nManage user accounts, profiles, and user-related operations including registration, profile updates, and account information retrieval.\n\n## Key Endpoints\n- **User Registration** - Create new user accounts\n- **Get User Profile** - Retrieve user profile information\n- **Update User Profile** - Modify user details and preferences\n- **Delete User Account** - Remove user accounts from the system\n\n## Authentication Requirements\n- **Registration**: No authentication required\n- **Profile Operations**: Requires valid JWT Bearer token in the Authorization header\n- Users can only access and modify their own profile data\n\n## Usage Guidelines\n1. Register a new user account using the registration endpoint\n2. Authenticate using the Auth folder endpoints to obtain a JWT token\n3. Include the token in subsequent requests: `Authorization: Bearer <your_token>`\n4. Use profile endpoints to manage user information\n\n## Rate Limiting\n- Standard rate limit: 100 requests/hour per user\n- Registration endpoint: 10 requests/hour per IP address\n\n## Notes\n- All passwords are securely hashed before storage\n- Email addresses must be unique across the system\n- Profile updates require re-authentication for sensitive fields"
+		},
+		{
+			"name": "Chatbot Interaction",
+			"item": [
+				{
+					"name": "LLM RESPONSE",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTQ0ZGI2OGRmNDkxYmY2N2IxMzQ3MzIiLCJyb2xlIjoidXNlciIsImlhdCI6MTc2NjEyMjA0NywiZXhwIjoxNzY2NzI2ODQ3fQ.PO7Da5uJiFfN__lmaKaT7Hfiv-hW3WmTCz_UyQMb2LM",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"userId\": \"6942f6bdc1b00356911f8df7\",\r\n  \"question\": \"What chat bot are you\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/chat",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"chat"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Successful Chat Response - Study Abroad",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTQyZjZiZGMxYjAwMzU2OTExZjhkZjciLCJyb2xlIjoidXNlciIsImlhdCI6MTcwNTMxNzAwMCwiZXhwIjoxNzA1MzIwNjAwfQ.example_signature"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\"message\": \"I want to study abroad in Canada. What are the requirements for international students?\"}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:5000/api/chat",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"chat"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": ""
+								},
+								{
+									"key": "Authorization",
+									"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTQyZjZiZGMxYjAwMzU2OTExZjhkZjciLCJyb2xlIjoidXNlciIsImlhdCI6MTcwNTMxNzAwMCwiZXhwIjoxNzA1MzIwNjAwfQ.example_signature",
+									"description": ""
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"data\": {\n    \"conversationId\": \"694a1234c1b00356911f9abc\",\n    \"message\": \"I want to study abroad in Canada. What are the requirements for international students?\",\n    \"response\": \"Great question! To study in Canada as an international student, you'll need:\\n\\n1. **Study Permit**: Required for programs longer than 6 months\\n2. **Letter of Acceptance**: From a Designated Learning Institution (DLI)\\n3. **Proof of Financial Support**: Show you can cover tuition and living expenses (approximately CAD $20,000-$30,000 per year)\\n4. **Language Proficiency**: IELTS (6.5+) or TOEFL scores\\n5. **Valid Passport**: Must be valid for the duration of your stay\\n6. **Medical Exam**: May be required depending on your country\\n7. **Clean Criminal Record**: Police certificate may be needed\\n\\nWould you like more details about any specific requirement or information about universities in Canada?\",\n    \"timestamp\": \"2024-01-15T14:25:30.000Z\"\n  }\n}"
+						},
+						{
+							"name": "Successful Chat Response - Deadlines",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTQyZjZiZGMxYjAwMzU2OTExZjhkZjciLCJyb2xlIjoidXNlciIsImlhdCI6MTcwNTMxNzAwMCwiZXhwIjoxNzA1MzIwNjAwfQ.example_signature"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\"message\": \"What is the application deadline for fall 2024?\"}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:5000/api/chat",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"chat"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": ""
+								},
+								{
+									"key": "Authorization",
+									"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTQyZjZiZGMxYjAwMzU2OTExZjhkZjciLCJyb2xlIjoidXNlciIsImlhdCI6MTcwNTMxNzAwMCwiZXhwIjoxNzA1MzIwNjAwfQ.example_signature",
+									"description": ""
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"data\": {\n    \"conversationId\": \"694a1234c1b00356911f9abc\",\n    \"message\": \"What is the application deadline for fall 2024?\",\n    \"response\": \"Application deadlines for Fall 2024 vary by institution and program:\\n\\n**General Timeline:**\\n- **Early Decision**: November 1-15, 2023\\n- **Regular Decision**: January 1-15, 2024\\n- **Rolling Admissions**: Varies, typically until March-May 2024\\n\\n**International Students**: Often have earlier deadlines (October-December 2023) to allow time for visa processing.\\n\\n**Graduate Programs**: Deadlines range from December 2023 to February 2024.\\n\\nI recommend checking specific universities' websites as deadlines can vary significantly. Would you like information about deadlines for specific universities or programs?\",\n    \"timestamp\": \"2024-01-15T14:28:45.000Z\"\n  }\n}"
+						},
+						{
+							"name": "Unauthorized - No Token",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\"message\": \"Tell me about scholarships\"}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:5000/api/chat",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"chat"
+									]
+								}
+							},
+							"status": "Unauthorized",
+							"code": 401,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": ""
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": false,\n  \"message\": \"Authentication required\",\n  \"error\": \"NO_TOKEN_PROVIDED\"\n}"
+						}
+					]
+				}
+			],
+			"description": "# Chatbot Interaction\n\nThis folder contains endpoints for real-time interaction with the Student Advisory Chatbot, enabling users to send messages and receive AI-powered responses.\n\n## Purpose\nFacilitate direct communication between users and the chatbot AI, providing academic advisory services, answering questions, and offering guidance to students.\n\n## Key Endpoints\n- **Send Message** - Submit a message to the chatbot and receive a response\n- **Get Quick Responses** - Retrieve suggested quick reply options\n- **Stream Response** - Get real-time streaming responses for longer queries\n- **Feedback** - Submit feedback on chatbot responses\n\n## Authentication Requirements\n- All endpoints require valid JWT Bearer token\n- Include token in header: `Authorization: Bearer <your_token>`\n- Anonymous access is not permitted\n\n## Usage Guidelines\n1. Authenticate and obtain a JWT token from the Auth folder\n2. Send messages using the Send Message endpoint with your query in the request body\n3. Receive structured responses with advisory information\n4. Use streaming endpoint for complex queries requiring longer processing time\n5. Provide feedback to improve chatbot accuracy\n\n## Rate Limiting\n- Standard users: 100 requests/hour\n- Premium users: 500 requests/hour\n- Streaming responses count as 2 requests\n\n## Notes\n- Messages are automatically saved to conversation history\n- Maximum message length: 2000 characters\n- Responses typically return within 2-5 seconds\n- The chatbot supports academic topics, course selection, career guidance, and study tips"
+		},
+		{
+			"name": "Conversation History",
+			"item": [
+				{
+					"name": "Convo by user",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/conversations/user/6942f6bdc1b00356911f8df7",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"conversations",
+								"user",
+								"6942f6bdc1b00356911f8df7"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Recent Convo",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/conversations/recent",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"conversations",
+								"recent"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "# Conversation History\n\nThis folder contains endpoints for retrieving, managing, and analyzing past conversations between users and the chatbot.\n\n## Purpose\nEnable users to access their conversation history, review past interactions, search through previous messages, and manage their chat records.\n\n## Key Endpoints\n- **Get All Conversations** - Retrieve a list of all user conversations\n- **Get Conversation by ID** - Fetch a specific conversation with full message history\n- **Search Conversations** - Search through past messages using keywords\n- **Delete Conversation** - Remove specific conversations from history\n- **Export Conversations** - Download conversation history in various formats\n\n## Authentication Requirements\n- All endpoints require valid JWT Bearer token\n- Users can only access their own conversation history\n- Admin users can access any user's conversations (see Admin folder)\n\n## Usage Guidelines\n1. Authenticate using your JWT token\n2. Use Get All Conversations to retrieve a paginated list of your chats\n3. Access specific conversations by ID for detailed message history\n4. Use search functionality to find specific topics or questions\n5. Export conversations for offline review or record-keeping\n\n## Rate Limiting\n- Standard rate limit: 100 requests/hour\n- Export operations count as 5 requests\n- Search operations count as 2 requests\n\n## Notes\n- Conversations are retained for 90 days by default\n- Deleted conversations cannot be recovered\n- Export formats: JSON, CSV, PDF\n- Search supports full-text search across all message content\n- Pagination: 20 conversations per page by default"
+		},
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "New Request",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTQ0MGE3MWRhMTZiNWQxNWY5MTBmZTEiLCJpYXQiOjE3NjYwNzU4NTUsImV4cCI6MTc2NjY4MDY1NX0.UKFuHVwKh10TTE7XD8OWY0SJ3oITeS6IxSAnC08FfNk",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:5000/api/users/6942f6bdc1b00356911f8df7",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"users",
+								"6942f6bdc1b00356911f8df7"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "LoginUser",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "",
+								"value": "",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"email\": \"prakhar@test1.com\",\r\n  \"password\": \"password123\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/auth/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Invalid Credentials",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\"email\": \"sarah.johnson@university.edu\", \"password\": \"WrongPassword123!\"}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:5000/api/auth/login",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"auth",
+										"login"
+									]
+								}
+							},
+							"status": "Unauthorized",
+							"code": 401,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": ""
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": false,\n  \"message\": \"Invalid email or password\",\n  \"error\": \"INVALID_CREDENTIALS\"\n}"
+						},
+						{
+							"name": "Successful Login",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\"email\": \"sarah.johnson@university.edu\", \"password\": \"SecurePass123!\"}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:5000/api/auth/login",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"auth",
+										"login"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": ""
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Login successful\",\n  \"data\": {\n    \"user\": {\n      \"_id\": \"6942f6bdc1b00356911f8df7\",\n      \"name\": \"Sarah Johnson\",\n      \"email\": \"sarah.johnson@university.edu\",\n      \"role\": \"user\"\n    },\n    \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTQyZjZiZGMxYjAwMzU2OTExZjhkZjciLCJyb2xlIjoidXNlciIsImlhdCI6MTcwNTMxNzAwMCwiZXhwIjoxNzA1MzIwNjAwfQ.example_signature\",\n    \"expiresIn\": \"1h\"\n  }\n}"
+						}
+					]
+				}
+			],
+			"description": "# Authentication\n\nThis folder contains all authentication and authorization endpoints for the Student Advisory Chatbot API, managing user sessions and access tokens.\n\n## Purpose\nHandle user authentication, token generation, token refresh, and session management to secure API access.\n\n## Key Endpoints\n- **Login** - Authenticate users and generate JWT access tokens\n- **Logout** - Invalidate user sessions and tokens\n- **Refresh Token** - Obtain new access tokens using refresh tokens\n- **Verify Token** - Validate token authenticity and expiration\n- **Password Reset Request** - Initiate password recovery process\n- **Password Reset Confirm** - Complete password reset with verification code\n\n## Authentication Requirements\n- **Login, Password Reset Request**: No authentication required\n- **Logout, Refresh Token, Verify Token**: Requires valid JWT Bearer token\n- **Password Reset Confirm**: Requires verification code from email\n\n## Usage Guidelines\n1. **Login**: Send credentials (email/username and password) to receive access and refresh tokens\n2. **Access Token**: Include in all authenticated requests as `Authorization: Bearer <access_token>`\n3. **Token Expiration**: Access tokens expire after 1 hour\n4. **Refresh**: Use refresh token endpoint before access token expires to maintain session\n5. **Logout**: Always logout to invalidate tokens when session ends\n\n## Rate Limiting\n- Login attempts: 5 requests per 15 minutes per IP address\n- Password reset: 3 requests per hour per email\n- Token refresh: 20 requests per hour\n- Other auth operations: 100 requests/hour\n\n## Notes\n- Access tokens expire after 1 hour\n- Refresh tokens expire after 7 days\n- Failed login attempts are logged for security\n- Account locks after 5 consecutive failed login attempts (15-minute lockout)\n- All tokens are invalidated upon password change\n- Use HTTPS in production to protect credentials"
+		},
+		{
+			"name": "Admin",
+			"item": [
+				{
+					"name": "RegisterNormalUser",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"Test Normal User\",\r\n  \"email\": \"normal@test.com\",\r\n  \"phone\": \"1111111111\",\r\n  \"password\": \"password123\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/users",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "LoginNormalUser",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"email\": \"normal@test.com\",\r\n  \"password\": \"password123\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/auth/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "NormalUserCantAcess",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer  eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTQ0MzkzYWYzYTFjYWQ1NjMyNWNkNGYiLCJpYXQiOjE3NjYwNzk4NDgsImV4cCI6MTc2NjY4NDY0OH0.8da82CKfIsOUNf8spiEs01F4rac0P4JfLxGbB6aTPe4",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"email\": \"normal@test.com\",\r\n  \"password\": \"password123\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/admin/users",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"admin",
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "adminRegister",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer  eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTQ0MzkzYWYzYTFjYWQ1NjMyNWNkNGYiLCJpYXQiOjE3NjYwNzk4NDgsImV4cCI6MTc2NjY4NDY0OH0.8da82CKfIsOUNf8spiEs01F4rac0P4JfLxGbB6aTPe4",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"Admin User\",\r\n  \"email\": \"admin@test.com\",\r\n  \"phone\": \"2222222222\",\r\n  \"password\": \"admin123\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/users",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "adminLoigin",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"email\": \"admin@test.com\",\r\n  \"password\": \"admin123\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/auth/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "adminAccess",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTQ0M2VhNDUwNzNmNTE2MmE5ZjRmZWMiLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NjYwODA1ODMsImV4cCI6MTc2NjY4NTM4M30.ta9fI6m3vUNDJRd1snDqxB94HcCxBPO3bOWLuO0km0w",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/admin/conversations",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"admin",
+								"conversations"
+							],
+							"query": [
+								{
+									"key": "Authorization",
+									"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTQ0M2VhNDUwNzNmNTE2MmE5ZjRmZWMiLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NjYwODA1ODMsImV4cCI6MTc2NjY4NTM4M30.ta9fI6m3vUNDJRd1snDqxB94HcCxBPO3bOWLuO0km0w",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "adminAcccessUsers",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTQ0M2VhNDUwNzNmNTE2MmE5ZjRmZWMiLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NjYwODA1ODMsImV4cCI6MTc2NjY4NTM4M30.ta9fI6m3vUNDJRd1snDqxB94HcCxBPO3bOWLuO0km0w",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:5000/api/admin/users",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"admin",
+								"users"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "# Admin\n\nThis folder contains administrative endpoints for system management, user oversight, analytics, and monitoring. Access is restricted to users with admin privileges.\n\n## Purpose\nProvide administrative tools for managing users, monitoring system health, viewing analytics, and performing system-wide operations.\n\n## Key Endpoints\n- **Get All Users** - Retrieve complete user list with details\n- **User Management** - Create, update, suspend, or delete user accounts\n- **View User Conversations** - Access any user's conversation history\n- **System Analytics** - View usage statistics, popular queries, and performance metrics\n- **System Health** - Monitor API health, uptime, and error rates\n- **Manage Permissions** - Assign or revoke admin privileges\n- **Bulk Operations** - Perform batch operations on multiple users\n\n## Authentication Requirements\n- All endpoints require valid JWT Bearer token with **admin role**\n- Standard users receive 403 Forbidden when accessing these endpoints\n- Admin status is verified on every request\n\n## Usage Guidelines\n1. Authenticate with admin credentials to obtain JWT token\n2. Verify admin privileges using the Verify Token endpoint\n3. Use appropriate endpoints for user management and system monitoring\n4. Exercise caution with bulk operations and user deletions\n5. Regularly review analytics for system optimization\n\n## Rate Limiting\n- **No rate limits** for admin users\n- All operations are logged for audit purposes\n\n## Notes\n- All admin actions are logged with timestamp and admin user ID\n- User deletions are soft deletes by default (can be recovered within 30 days)\n- Analytics data is updated every 15 minutes\n- System health checks run every 5 minutes\n- Admin privileges cannot be self-assigned\n- Bulk operations have a maximum batch size of 100 users\n- Export capabilities include full system data dumps"
+		}
+	],
+	"auth": {
+		"type": "jwt",
+		"jwt": [
+			{
+				"key": "algorithm",
+				"value": "HS256",
+				"type": "string"
+			},
+			{
+				"key": "isSecretBase64Encoded",
+				"value": false,
+				"type": "boolean"
+			},
+			{
+				"key": "payload",
+				"value": "{}",
+				"type": "string"
+			},
+			{
+				"key": "addTokenTo",
+				"value": "header",
+				"type": "string"
+			},
+			{
+				"key": "headerPrefix",
+				"value": "Bearer",
+				"type": "string"
+			},
+			{
+				"key": "queryParamKey",
+				"value": "token",
+				"type": "string"
+			},
+			{
+				"key": "header",
+				"value": "{}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}
