@@ -120,6 +120,7 @@ Authorization: Bearer <token>
 *   `name`: String
 *   `email`: String (Unique)
 *   `password`: String (Hashed)
+*   `phone number`:String(optional)
 *   `role`: Enum (`user`, `admin`)
 *   `createdAt`: Date
 
