@@ -5,7 +5,7 @@ const {
   getUserById,
 } = require("../controllers/user.controller");
 
-const { protect } = require("../../middlewares/auth.middleware");
+const { protect } = require("../middlewares/auth.middleware");
 
 const router = express.Router();
 

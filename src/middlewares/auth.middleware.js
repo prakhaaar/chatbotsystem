@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const User = require("../src/models/User");
+const User = require("../models/User");
 
 const protect = async (req, res, next) => {
   try {
@@ -33,7 +33,11 @@ const protect = async (req, res, next) => {
     }
 
     // Attach user to request
-    req.user = user;
+    req.user = {
+      id: user._id,
+      role: user.role,
+    };
+
     next();
   } catch (error) {
     console.error("Auth middleware error:", error);
