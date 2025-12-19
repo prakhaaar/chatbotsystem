@@ -148,6 +148,9 @@ Authorization: Bearer <token>
 *   **Check Status**: `GET /health`
 *   **Response**: `{"status": "ok", "message": "Server is healthy"}`
 
+## Screenshots
+* /screenshots/
+
 ## Deliverables
 
 This submission includes:
