@@ -158,6 +158,7 @@ This submission includes:
    - Environment variables
    - API usage examples
    - Tech stack details
+3. Complete Postman Collection
 
 ## Acknowledgments
 Special thanks to **GlobeTrek Overseas** for this opportunity.
