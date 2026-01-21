@@ -9,26 +9,24 @@ const { askLLM } = require("../services/llm.service");
  */
 const createChat = async (req, res) => {
   try {
-    const { userId, question } = req.body;
+    const { question } = req.body;
+    const userId = req.user.id;
 
-    if (!userId || !question) {
+    if (!question) {
       return res.status(400).json({
         success: false,
-        message: "userId and question are required",
+        message: "Question is required",
       });
     }
 
-    // 1️⃣ Create Query
     const query = await Query.create({
       user: userId,
       question,
       status: "pending",
     });
 
-    // 2️⃣ Ask LLM
     const aiResponse = await askLLM(question);
 
-    // 3️⃣ Save Conversation
     const conversation = await Conversation.create({
       user: userId,
       query: query._id,
@@ -36,7 +34,6 @@ const createChat = async (req, res) => {
       response: aiResponse,
     });
 
-    // 4️⃣ Update Query status
     query.status = "answered";
     await query.save();
 
@@ -44,14 +41,11 @@ const createChat = async (req, res) => {
       success: true,
       message: "Response generated",
       data: {
-        queryId: query._id,
         conversationId: conversation._id,
         response: aiResponse,
       },
     });
   } catch (error) {
-    console.error("Chatbot error:", error);
-
     return res.status(500).json({
       success: false,
       message: "Failed to generate response",
